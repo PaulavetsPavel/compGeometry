@@ -1,0 +1,50 @@
+.content {
+    padding: 20px;
+    display: flex;
+}
+
+
+form label {
+    display: block;
+}
+
+form input {
+    display: block;
+    width: 30px;
+    height: 20px;
+    margin-right: 20px;
+}
+
+.form {
+    margin-right: 50px;
+    min-height: 90vh;
+}
+.form h2{
+    margin-bottom: 20px;
+}
+.pointLabel {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin-left: 20px;
+}
+.line{
+    margin: 30px 0;
+}
+.line p{
+    margin: 0;
+}
+#canvasPointAndLine {
+    background-color: #f1efec;
+    border: 2px solid black;
+ }
+.picture{
+    width: 50%;
+    min-height: 90vh;
+}
+.answer{
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: darkred;
+}

@@ -9,15 +9,60 @@
 <body>
 <main class="main">
     <h1 class="title">Вычислительная геометрия</h1>
-        <h2 class="sub-title">Определение положения одних объектов относительно других</h2>
+    <h2 class="sub-title">Определение положения одних объектов относительно других</h2>
 
     <div class="pages">
         <div class="page one">
             <div class="page-title">
-                title 1
+                Определение положения точки относительно прямой
             </div>
             <div class="page-content hide">
-                <p>content 1</p>
+                <div class="content">
+
+
+                    <div class="form">
+                        <h2>Определение положения точки относительно прямой</h2>
+                        <form method="post" action="#">
+                            <div class="point">
+                                <h3>Введите координаты точки p<sub>0</sub>.</h3>
+                                <div class="pointLabel">
+                                    <label for="pointX">x:</label>
+                                    <input type="number" name="pointX" id="pointX" value="">
+                                    <label for="pointY">y:</label>
+                                    <input type="number" name="pointY" id="pointY" value="">
+                                </div>
+                            </div>
+                            <div class="line">
+                                <h3>Введите координаты точек p<sub>1</sub> (начала отрезка) и p<sub>2</sub> (конца
+                                    отрезка).</h3>
+                                <p>p<sub>1</sub>: </p>
+                                <div class="pointLabel">
+                                    <label for="lineStartX">x:</label>
+                                    <input type="number" name="lineStartX" id="lineStartX" value="">
+                                    <label for="lineStartY">y:</label>
+                                    <input type="number" name="lineStartY" id="lineStartY" value="">
+                                </div>
+                                <br>
+                                <p>p<sub>2</sub>: </p>
+                                <div class="pointLabel">
+                                    <label for="lineEndX">x:</label>
+                                    <input type="number" name="lineEndX" id="lineEndX" value="">
+                                    <label for="lineStartY">y:</label>
+                                    <input type="number" name="lineEndY" id="lineEndY" value="">
+                                </div>
+                            </div>
+                            <button type="submit" id="pointSubmit" class="btn">Определить положение</button>
+
+                        </form>
+                        <div class="answer">
+
+                        </div>
+                    </div>
+
+                    <div class="picture">
+                        <canvas id="canvasPointAndLine" width="525" height="525"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="page two">
@@ -49,6 +94,7 @@
 
 </main>
 
-<script src="js/main.js"></script>
+<script type="module" src="js/script.js"></script>
+
 </body>
 </html>
