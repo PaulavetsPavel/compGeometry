@@ -1,11 +1,42 @@
+function openPage(event, btn) {
+    event.preventDefault();
+    event.stopPropagation();
+    // получение окна которое следует открыть
+    const currentWin = event.target.closest('.page');
+    // открытие текущего она
+    currentWin.classList.toggle('full');
+    // скрытие заголовка
+    currentWin.children[0].classList.toggle('hide');
+    // отображение контента окна
+    currentWin.children[1].classList.toggle('hide');
+    // запрет всплытия события клика по контенту
+    currentWin.children[1].addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+    // появление кнопки закрытия
+    btn.classList.toggle('hide');
+    return currentWin;
+}
+
+function closePage(btn) {
+
+    // скрытие кнопки закрытия окна
+    btn.classList.toggle('hide');
+    // скрытие контента окна
+    btn.closest('div').querySelector('.full').firstElementChild.classList.toggle('hide');
+    btn.closest('div').querySelector('.full').lastElementChild.classList.toggle('hide');
+    // возврат окна к первоначальному состоянию через удаление класса
+    btn.closest('div').querySelector('.full').classList.remove('full');
+}
+
 function clearCanvas(canvas, ctx) {
-    ctx.clearRect(23, 0, canvas.clientWidth - 23, canvas.clientHeight - 23);
+    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    createCoordsSystemOnCanvas(canvas, ctx);
 }
 
 function clearAnswerPlace(place) {
-    const answerText = document.createElement('p');
-    answerText.innerText = '';
-    place.appendChild(answerText);
+    place.innerHTML = '';
 }
 
 function createCanvas(canvasPlace, width, height) {
@@ -22,7 +53,6 @@ function createContext(canvas) {
 }
 
 function createCoordsSystemOnCanvas(canvas, ctx) {
-    ctx.clearRect(23, 0, canvas.clientWidth, canvas.clientHeight);
     // создание оси y
     ctx.beginPath();
     ctx.moveTo(20, canvas.clientHeight - 10);
@@ -86,78 +116,92 @@ function determinant(point, line) {
     let [pointX, pointY] = [...point];
     let [lineStartX, lineStartY] = [...line[0]];
     let [lineEndX, lineEndY] = [...line[1]];
+
     return (lineEndX - lineStartX) * (pointY - lineStartY) - (pointX - lineStartX) * (lineEndY - lineStartY);
 }
 
-function searchLocationPoint(point, line) {
-    let det = determinant(point, line);
-    let place = det > 0 ? 'левее' : det < 0 ? 'правее' : 'на';
-    return `Точка расположена ${place} прямой`;
+function getYfromEquationOfLine(line, x) {
+    const [x1, y1] = [...line[0]];
+    const [x2, y2] = [...line[1]];
+
+    return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
 }
 
-function openPage(event, btn) {
-    event.preventDefault();
-    event.stopPropagation();
-    // получение окна которое следует открыть
-    const currentWin = event.target.closest('.page');
-    // открытие текущего она
-    currentWin.classList.toggle('full');
-    // скрытие заголовка
-    currentWin.children[0].classList.toggle('hide');
-    // отображение контента окна
-    currentWin.children[1].classList.toggle('hide');
-    // запрет всплытия события клика по контенту
-    currentWin.children[1].addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-    });
-    // появление кнопки закрытия
-    btn.classList.toggle('hide');
-    return currentWin;
+function checkArrayIsNull(arrs) {
+        return arrs.every(arr => arr.every(el => el === 0));
 }
 
-function closePage(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    // скрытие кнопки закрытия окна
-    this.classList.toggle('hide');
-    // скрытие контента окна
-    this.closest('div').querySelector('.full').firstElementChild.classList.toggle('hide');
-    this.closest('div').querySelector('.full').lastElementChild.classList.toggle('hide');
-    // возврат окна к первоначальному состоянию через удаление класса
-    this.closest('div').querySelector('.full').classList.remove('full');
-}
 
-function showAnswerForPointAndLine(form, answerPlace, canvas, ctx) {
+function showAnswerForPointAndLine(form, answerPlace, canvas, ctx, xMin, xMax) {
     const point = [+form.pointX.value, +form.pointY.value];
     const line = [
         [+form.lineStartX.value, +form.lineStartY.value],
         [+form.lineEndX.value, +form.lineEndY.value]];
     const answerText = document.createElement('p');
-    answerText.innerText = searchLocationPoint(point, line);
-    answerPlace.appendChild(answerText);
 
-    showPoint(canvas, ctx, point, 'p0');
-    showPoint(canvas, ctx, line[0], 'p1');
-    showPoint(canvas, ctx, line[1], 'p2');
-    showLine(canvas, ctx, line);
+// проверка введенных данных (массив одноуровневых массивов)
+    if (!!checkArrayIsNull([point, ...line])) {
+        answerText.innerText = `Введите данные`;
+    } else {
+        const det = determinant(point, line);
+        const place = det > 0 ? 'левее' : det < 0 ? 'правее' : 'на';
+        answerText.innerText = `Точка расположена ${place} прямой`;
+        showPoint(canvas, ctx, point, 'p0');
+        showPoint(canvas, ctx, line[0], 'p1');
+        showPoint(canvas, ctx, line[1], 'p2');
+
+        showLine(canvas, ctx, [[xMin, getYfromEquationOfLine(line, xMin)], [xMax, getYfromEquationOfLine(line, xMax)]]);
+    }
+    answerPlace.appendChild(answerText);
 }
 
-function showAnswerForLineAndLine(form, answerPlace, canvas, ctx) {
+function showAnswerForLineAndLine(form, answerPlace, canvas, ctx, xMin, xMax) {
     const firstLine = [
         [+form.firstLineStartX.value, +form.firstLineStartY.value],
         [+form.firstLineEndX.value, +form.firstLineEndY.value]];
     const secondLine = [
         [+form.secondLineStartX.value, +form.secondLineStartY.value],
         [+form.secondLineEndX.value, +form.secondLineEndY.value]];
-    const answerText = document.createElement('p');
-    answerText.innerText = 'line';
-    answerPlace.appendChild(answerText);
 
-    // showPoint(canvas, ctx, point, 'p0');
-    // showPoint(canvas, ctx, line[0], 'p1');
-    // showPoint(canvas, ctx, line[1], 'p2');
-    // showLine(canvas, ctx, line);
+    const answerText = document.createElement('p');
+
+    if (!!checkArrayIsNull([...firstLine, ...secondLine])) {
+        answerText.innerText = `Введите данные`;
+    } else {
+        // начало первой прямой сравнивается со второй прямой
+        const det1 = determinant(firstLine[0], secondLine);
+        // конец первой прямой сравнивается со второй прямой
+        const det2 = determinant(firstLine[1], secondLine);
+        // начало второй прямой сравнивается с первой прямой
+        const det3 = determinant(secondLine[0], firstLine);
+        // конец второй прямой сравнивается с первой прямой
+        const det4 = determinant(secondLine[1], firstLine);
+
+        if (det1 === 0 && det2 === 0 && det3 === 0 && det4 === 0) {
+            if ((((secondLine[0][0] <= firstLine[1][0]) && (secondLine[0][1] <= firstLine[1][1])) &&
+                    ((secondLine[0][0] >= firstLine[0][0]) && (secondLine[0][1] >= firstLine[0][1]))) ||
+                (((secondLine[1][0] <= firstLine[1][0]) && (secondLine[1][1] <= firstLine[1][1])) &&
+                    ((secondLine[1][0] >= firstLine[0][0]) && (secondLine[1][1] >= firstLine[0][1])))) {
+                answerText.innerText = 'Отрезки лежат на одной прямой и пересекаются';
+            }
+            if (((secondLine[0][0] > firstLine[1][0]) && (secondLine[0][1] > firstLine[1][1])) ||
+                ((secondLine[1][0] < firstLine[0][0]) && (secondLine[1][1] < firstLine[0][1]))) {
+                answerText.innerText = 'Отрезки лежат на одной прямой и не пересекаются';
+            }
+        } else {
+            answerText.innerText = (det1 * det2 <= 0) && (det3 * det4 <= 0) ?
+                'Отрезки пересекаются' : 'Отрезки не пересекаются';
+        }
+
+
+        showPoint(canvas, ctx, firstLine[0], 'p1');
+        showPoint(canvas, ctx, firstLine[1], 'p2');
+        showPoint(canvas, ctx, secondLine[0], 'p3');
+        showPoint(canvas, ctx, secondLine[1], 'p4');
+        showLine(canvas, ctx, firstLine);
+        showLine(canvas, ctx, secondLine);
+    }
+    answerPlace.appendChild(answerText);
 }
 
 export {
