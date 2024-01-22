@@ -82,7 +82,7 @@ input[type='number'] {
     transition: all .5s;
 }
 
-.close-page {
+.close-btn {
     position: absolute;
     right: 1.1%;
     top: 3.3%;
@@ -103,5 +103,13 @@ input[type='number'] {
     width: 20%;
     height: 25%;
     font-weight: 700;
+}
+#canvas {
+    background-color: #f1efec;
+    border: 2px solid black;
+}
+.picture{
+    width: 50%;
+    min-height: 90vh;
 }
 

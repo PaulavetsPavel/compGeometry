@@ -9,7 +9,7 @@ form label {
 }
 
 form input {
-    display: block;
+    display: inline-block;
     width: 30px;
     height: 20px;
     margin-right: 20px;
@@ -22,7 +22,7 @@ form input {
 .form h2{
     margin-bottom: 20px;
 }
-.pointLabel {
+.coordsLabel {
     display: flex;
     flex-direction: row;
     align-items: baseline;
@@ -34,14 +34,7 @@ form input {
 .line p{
     margin: 0;
 }
-#canvasPointAndLine {
-    background-color: #f1efec;
-    border: 2px solid black;
- }
-.picture{
-    width: 50%;
-    min-height: 90vh;
-}
+
 .answer{
     padding: 20px;
     font-size: 1.5rem;

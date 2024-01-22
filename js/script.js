@@ -1,41 +1,54 @@
-import {clearCanvas, clearAnswerPlace,
-    showPoint, showLine, searchLocationPoint,
-    openPage, closePage} from './function.js';
+import {
+    clearCanvas, clearAnswerPlace,
+    openPage, closePage, createCoordsSystemOnCanvas,
+    createCanvas, createContext,showAnswerForPointAndLine,
+    showAnswerForLineAndLine,
+} from './function.js';
 
 // ---- FOR MAIN ----
 const pages = document.querySelector('.pages');
-const closeBtn = document.querySelector('.close-page');
+const closeBtn = document.querySelector('.close-btn');
 
 // ---- FOR PointAndLine ----
-const pointSubmit = document.querySelector('#pointSubmit');
-const form = document.querySelector('form');
+let btnSubmit = null;
+let form = null;
+
 // создание параграфа для ответа
-const answerPlacePointAndLine = document.querySelector('.answer');
-const answerTextPointAndLine = document.createElement('p');
+let answerPlace = null;
+
 // создание контекста канвы
-const canvasPointAndLine = document.querySelector('#canvasPointAndLine');
-const contextPointAndLine = canvasPointAndLine.getContext('2d');
+let canvas = null;
+let ctx = null;
 
 // ---- FOR MAIN ----
-pages.addEventListener('click', () => openPage(event, closeBtn, canvasPointAndLine, contextPointAndLine));
+// открытие окна
+pages.addEventListener('click', () => {
+    const currentWin = openPage(event, closeBtn);
+    // создание канвы
+    const canvasPlace = currentWin.querySelector('.picture');
+    canvas = createCanvas(canvasPlace, 525, 525);
+    ctx = createContext(canvas);
+    // создание координатных осей
+    createCoordsSystemOnCanvas(canvas, ctx);
+    // место для ответа
+    answerPlace = currentWin.querySelector('.answer');
+    form = currentWin.querySelector('form')
+    btnSubmit = currentWin.querySelector('.btn');
+    btnSubmit.addEventListener('click', (e) => {
+        e.preventDefault();
+        clearCanvas(canvas, ctx);
+        clearAnswerPlace(answerPlace);
+        if (btnSubmit.classList.contains("pointAndLine"))
+            showAnswerForPointAndLine(form,answerPlace,canvas,ctx);
+        if(btnSubmit.classList.contains("lineAndLine"))
+            showAnswerForLineAndLine(form,answerPlace,canvas,ctx);
+    });
+   });
+// закрытие окна
 closeBtn.addEventListener('click', closePage);
 
 // ---- FOR PointAndLine ----
-pointSubmit.addEventListener('click', (e) => {
-    e.preventDefault();
-    clearCanvas(canvasPointAndLine, contextPointAndLine);
-    clearAnswerPlace(answerPlacePointAndLine, answerTextPointAndLine);
-    const point = [form.pointX.value, form.pointY.value];
-    const line = [[form.lineStartX.value, form.lineStartY.value], [form.lineEndX.value, form.lineEndY.value]];
 
-    answerTextPointAndLine.innerText = searchLocationPoint(point, line);
-    answerPlacePointAndLine.appendChild(answerTextPointAndLine);
-
-    showPoint(canvasPointAndLine, contextPointAndLine, point, 'p0');
-    showPoint(canvasPointAndLine, contextPointAndLine, line[0], 'p1');
-    showPoint(canvasPointAndLine, contextPointAndLine, line[1], 'p2');
-    showLine(canvasPointAndLine, contextPointAndLine, line);
-});
 
 
 

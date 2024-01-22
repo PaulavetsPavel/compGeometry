@@ -2,29 +2,23 @@ function clearCanvas(canvas, ctx) {
     ctx.clearRect(23, 0, canvas.clientWidth - 23, canvas.clientHeight - 23);
 }
 
-function clearAnswerPlace(place, tag) {
-    tag.innerText = '';
-    place.appendChild(tag);
+function clearAnswerPlace(place) {
+    const answerText = document.createElement('p');
+    answerText.innerText = '';
+    place.appendChild(answerText);
 }
 
-function showPoint(canvas, ctx, point, name) {
-    let [pointX, pointY] = [...point];
-    ctx.beginPath();
-    ctx.moveTo(pointX * 10 + 21, canvas.clientHeight - 21 - pointY * 10);
-    ctx.arc(pointX * 10 + 21, canvas.clientHeight - 21 - pointY * 10, 2, 0, Math.PI * 2,);
-    ctx.fill();
-    ctx.fillText(name, pointX * 10 + 15, canvas.clientHeight - 30 - pointY * 10);
-
+function createCanvas(canvasPlace, width, height) {
+    const canvas = document.createElement('canvas');
+    canvas.width = `${width}`;
+    canvas.height = `${height}`;
+    canvas.id = 'canvas';
+    canvasPlace.appendChild(canvas);
+    return canvas;
 }
 
-function showLine(canvas, ctx, line) {
-    let [lineStartX, lineStartY] = [...line[0]];
-    let [lineEndX, lineEndY] = [...line[1]];
-
-    ctx.beginPath();
-    ctx.moveTo(lineStartX * 10 + 21, canvas.clientHeight - 21 - lineStartY * 10);
-    ctx.lineTo(lineEndX * 10 + 21, canvas.clientHeight - 21 - lineEndY * 10);
-    ctx.stroke();
+function createContext(canvas) {
+    return canvas.getContext('2d');
 }
 
 function createCoordsSystemOnCanvas(canvas, ctx) {
@@ -68,6 +62,26 @@ function createCoordsSystemOnCanvas(canvas, ctx) {
     ctx.stroke();
 }
 
+function showPoint(canvas, ctx, point, name) {
+    let [pointX, pointY] = [...point];
+    ctx.beginPath();
+    ctx.moveTo(pointX * 10 + 21, canvas.clientHeight - 21 - pointY * 10);
+    ctx.arc(pointX * 10 + 21, canvas.clientHeight - 21 - pointY * 10, 2, 0, Math.PI * 2,);
+    ctx.fill();
+    ctx.fillText(name, pointX * 10 + 15, canvas.clientHeight - 30 - pointY * 10);
+
+}
+
+function showLine(canvas, ctx, line) {
+    let [lineStartX, lineStartY] = [...line[0]];
+    let [lineEndX, lineEndY] = [...line[1]];
+
+    ctx.beginPath();
+    ctx.moveTo(lineStartX * 10 + 21, canvas.clientHeight - 21 - lineStartY * 10);
+    ctx.lineTo(lineEndX * 10 + 21, canvas.clientHeight - 21 - lineEndY * 10);
+    ctx.stroke();
+}
+
 function determinant(point, line) {
     let [pointX, pointY] = [...point];
     let [lineStartX, lineStartY] = [...line[0]];
@@ -81,7 +95,7 @@ function searchLocationPoint(point, line) {
     return `Точка расположена ${place} прямой`;
 }
 
-function openPage(event, btn, canvas, ctx) {
+function openPage(event, btn) {
     event.preventDefault();
     event.stopPropagation();
     // получение окна которое следует открыть
@@ -99,7 +113,7 @@ function openPage(event, btn, canvas, ctx) {
     });
     // появление кнопки закрытия
     btn.classList.toggle('hide');
-    createCoordsSystemOnCanvas(canvas, ctx);
+    return currentWin;
 }
 
 function closePage(event) {
@@ -114,5 +128,41 @@ function closePage(event) {
     this.closest('div').querySelector('.full').classList.remove('full');
 }
 
-export {clearCanvas, clearAnswerPlace, showPoint, showLine, searchLocationPoint, openPage, closePage};
+function showAnswerForPointAndLine(form, answerPlace, canvas, ctx) {
+    const point = [+form.pointX.value, +form.pointY.value];
+    const line = [
+        [+form.lineStartX.value, +form.lineStartY.value],
+        [+form.lineEndX.value, +form.lineEndY.value]];
+    const answerText = document.createElement('p');
+    answerText.innerText = searchLocationPoint(point, line);
+    answerPlace.appendChild(answerText);
+
+    showPoint(canvas, ctx, point, 'p0');
+    showPoint(canvas, ctx, line[0], 'p1');
+    showPoint(canvas, ctx, line[1], 'p2');
+    showLine(canvas, ctx, line);
+}
+
+function showAnswerForLineAndLine(form, answerPlace, canvas, ctx) {
+    const firstLine = [
+        [+form.firstLineStartX.value, +form.firstLineStartY.value],
+        [+form.firstLineEndX.value, +form.firstLineEndY.value]];
+    const secondLine = [
+        [+form.secondLineStartX.value, +form.secondLineStartY.value],
+        [+form.secondLineEndX.value, +form.secondLineEndY.value]];
+    const answerText = document.createElement('p');
+    answerText.innerText = 'line';
+    answerPlace.appendChild(answerText);
+
+    // showPoint(canvas, ctx, point, 'p0');
+    // showPoint(canvas, ctx, line[0], 'p1');
+    // showPoint(canvas, ctx, line[1], 'p2');
+    // showLine(canvas, ctx, line);
+}
+
+export {
+    clearCanvas, clearAnswerPlace, openPage, closePage,
+    createCoordsSystemOnCanvas, createContext, createCanvas,
+    showAnswerForPointAndLine, showAnswerForLineAndLine
+};
 
