@@ -11,6 +11,7 @@ const X_MAX = 50;
 const pages = document.querySelector('.pages');
 const closeBtn = document.querySelector('.close-btn');
 let currentWin;
+let inputs;
 let canvasPlace;
 let answerPlace;
 // ---- FOR MAIN ----
@@ -26,9 +27,15 @@ pages.addEventListener('click', (event) => {
     createCoordsSystemOnCanvas(canvas, ctx);
     // место для ответа
     answerPlace = currentWin.querySelector('.answer');
-    const form = currentWin.querySelector('form');
-    const btnSubmit = currentWin.querySelector('.btn');
+    inputs = currentWin.querySelector('form').querySelectorAll('input[type=number]');
+    const points = [];
+    inputs.forEach((input, index) => {
+        if (index % 2 === 0) {
+            points.push([+inputs[index].value, +inputs[index + 1].value]);
+        }
+    });
 
+    const btnSubmit = currentWin.querySelector('.btn');
     btnSubmit.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -36,9 +43,9 @@ pages.addEventListener('click', (event) => {
         clearAnswerPlace(answerPlace);
 
         if (btnSubmit.classList.contains('pointAndLine'))
-            showAnswerForPointAndLine(form, answerPlace, canvas, ctx, X_MIN, X_MAX);
+            showAnswerForPointAndLine(points, answerPlace, canvas, ctx, X_MIN, X_MAX);
         if (btnSubmit.classList.contains('lineAndLine'))
-            showAnswerForLineAndLine(form, answerPlace, canvas, ctx, X_MIN, X_MAX);
+            showAnswerForLineAndLine(points, answerPlace, canvas, ctx);
     });
 });
 // закрытие окна
@@ -48,9 +55,9 @@ closeBtn.addEventListener('click', (event) => {
     closePage(closeBtn);
     canvasPlace.innerHTML = '';
     answerPlace.innerHTML = '';
-    const inputs = currentWin.querySelectorAll('input[type=number]');
+
     for (const input of inputs) {
-        input.value=''
+        input.value = '';
     }
 });
 

@@ -112,10 +112,8 @@ function showLine(canvas, ctx, line) {
     ctx.stroke();
 }
 
-function determinant(point, line) {
-    let [pointX, pointY] = [...point];
-    let [lineStartX, lineStartY] = [...line[0]];
-    let [lineEndX, lineEndY] = [...line[1]];
+function determinant(points) {
+    let [pointX, pointY, lineStartX, lineStartY, lineEndX, lineEndY] = [...points];
 
     return (lineEndX - lineStartX) * (pointY - lineStartY) - (pointX - lineStartX) * (lineEndY - lineStartY);
 }
@@ -127,55 +125,47 @@ function getYfromEquationOfLine(line, x) {
     return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
 }
 
-function checkArrayIsNull(arrs) {
-        return arrs.every(arr => arr.every(el => el === 0));
+function checkArrayIsZero(arrs) {
+    return arrs.every(arr => arr.every(el => el === 0));
 }
 
 
-function showAnswerForPointAndLine(form, answerPlace, canvas, ctx, xMin, xMax) {
-    const point = [+form.pointX.value, +form.pointY.value];
-    const line = [
-        [+form.lineStartX.value, +form.lineStartY.value],
-        [+form.lineEndX.value, +form.lineEndY.value]];
+function showAnswerForPointAndLine(points, answerPlace, canvas, ctx, xMin, xMax) {
+    const [point, line] = [points[0], [points[1], points[2]]];
     const answerText = document.createElement('p');
-
-// проверка введенных данных (массив одноуровневых массивов)
-    if (!!checkArrayIsNull([point, ...line])) {
+    // проверка введенных данных (массив одноуровневых массивов)
+    if (!!checkArrayIsZero([point, ...line])) {
         answerText.innerText = `Введите данные`;
     } else {
         const det = determinant(point, line);
         const place = det > 0 ? 'левее' : det < 0 ? 'правее' : 'на';
         answerText.innerText = `Точка расположена ${place} прямой`;
-        showPoint(canvas, ctx, point, 'p0');
-        showPoint(canvas, ctx, line[0], 'p1');
-        showPoint(canvas, ctx, line[1], 'p2');
-
+        points.forEach((point, index) => {
+            showPoint(canvas, ctx, point, `p${index}`);
+        });
         showLine(canvas, ctx, [[xMin, getYfromEquationOfLine(line, xMin)], [xMax, getYfromEquationOfLine(line, xMax)]]);
     }
     answerPlace.appendChild(answerText);
 }
 
-function showAnswerForLineAndLine(form, answerPlace, canvas, ctx, xMin, xMax) {
-    const firstLine = [
-        [+form.firstLineStartX.value, +form.firstLineStartY.value],
-        [+form.firstLineEndX.value, +form.firstLineEndY.value]];
-    const secondLine = [
-        [+form.secondLineStartX.value, +form.secondLineStartY.value],
-        [+form.secondLineEndX.value, +form.secondLineEndY.value]];
+function showAnswerForLineAndLine(points, answerPlace, canvas, ctx, xMin, xMax) {
 
+    const [firstLine, secondLine] = [[points[0], points[1]], [points[2], points[3]]];
     const answerText = document.createElement('p');
 
-    if (!!checkArrayIsNull([...firstLine, ...secondLine])) {
+    if (!!checkArrayIsZero([...firstLine, ...secondLine])) {
         answerText.innerText = `Введите данные`;
     } else {
-        // начало первой прямой сравнивается со второй прямой
-        const det1 = determinant(firstLine[0], secondLine);
-        // конец первой прямой сравнивается со второй прямой
-        const det2 = determinant(firstLine[1], secondLine);
-        // начало второй прямой сравнивается с первой прямой
-        const det3 = determinant(secondLine[0], firstLine);
-        // конец второй прямой сравнивается с первой прямой
-        const det4 = determinant(secondLine[1], firstLine);
+        const [det1, det2, det3, det4] = [
+            // начало первой прямой сравнивается со второй прямой
+            determinant([...firstLine[0], ...secondLine[0], ...secondLine[1]]),
+            // конец первой прямой сравнивается со второй прямой
+            determinant([...firstLine[1], ...secondLine[0], ...secondLine[1]]),
+            // // начало второй прямой сравнивается с первой прямой
+            determinant([...secondLine[0], ...firstLine[0], ...firstLine[1]]),
+            // // конец второй прямой сравнивается с первой прямой
+            determinant([...secondLine[1], ...firstLine[0], ...firstLine[1]]),
+        ];
 
         if (det1 === 0 && det2 === 0 && det3 === 0 && det4 === 0) {
             if ((((secondLine[0][0] <= firstLine[1][0]) && (secondLine[0][1] <= firstLine[1][1])) &&
@@ -193,13 +183,12 @@ function showAnswerForLineAndLine(form, answerPlace, canvas, ctx, xMin, xMax) {
                 'Отрезки пересекаются' : 'Отрезки не пересекаются';
         }
 
-
-        showPoint(canvas, ctx, firstLine[0], 'p1');
-        showPoint(canvas, ctx, firstLine[1], 'p2');
-        showPoint(canvas, ctx, secondLine[0], 'p3');
-        showPoint(canvas, ctx, secondLine[1], 'p4');
-        showLine(canvas, ctx, firstLine);
-        showLine(canvas, ctx, secondLine);
+        points.forEach((point, index) => {
+            showPoint(canvas, ctx, point, `p${index}`);
+        });
+        [firstLine, secondLine].forEach(line => {
+            showLine(canvas, ctx, line);
+        });
     }
     answerPlace.appendChild(answerText);
 }
