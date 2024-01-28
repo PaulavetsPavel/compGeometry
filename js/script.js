@@ -15,10 +15,8 @@ const regExpDelBrackets = /[();, ]/;
 const pages = document.querySelector('.pages');
 const closeBtn = document.querySelector('.close-btn');
 let currentWin = null;
-let form = null;
 let inputs = null;
 let inputsValue = null;
-let textareaValue = null;
 let canvasPlace = null;
 let answerPlace = null
 ;
@@ -27,7 +25,7 @@ let answerPlace = null
 pages.addEventListener('click', (event) => {
     event.preventDefault();
     currentWin = openPage(event, closeBtn);
-    form = currentWin.querySelector('form');
+
     // создание канвы
     canvasPlace = currentWin.querySelector('.picture');
     const canvas = createCanvas(canvasPlace, 525, 525);
@@ -37,7 +35,7 @@ pages.addEventListener('click', (event) => {
     // место для ответа
     answerPlace = currentWin.querySelector('.answer');
 
-    inputs = form.querySelectorAll('input[type=number]');
+    inputs = currentWin.querySelector('form').querySelectorAll('input[type=number]');
 
 
     const btnSubmit = currentWin.querySelector('.btn');
@@ -47,16 +45,12 @@ pages.addEventListener('click', (event) => {
         clearCanvas(canvas, ctx);
         clearAnswerPlace(answerPlace);
 
-        // т. к. querySelectorAll всегда возвращает NodeList
-        inputsValue = (inputs.length !== 0) ? Array.from(inputs).map(input => input.value) : null;
-        // querySelector вернет undefined если не найдет textarea
-        textareaValue = form.querySelector(`textarea[name='pointsCoords']`)?.value
-            .split(regExpDelBrackets).filter(elem => elem !== '');
+        inputsValue = Array.from(inputs).map(input => input.value);
 
         const points = [];
-        (inputsValue ?? textareaValue).forEach((element, index, array) => {
+        inputsValue.forEach((value, index, array) => {
             if (index % 2 === 0) {
-                points.push([+element, +(array[index + 1])]);
+                points.push([+value, +(array[index + 1])]);
             }
         });
 
