@@ -2,7 +2,7 @@ import {
     clearCanvas, clearAnswerPlace,
     openPage, closePage, createCoordsSystemOnCanvas,
     createCanvas, createContext, showAnswerForPointAndLine,
-    showAnswerForLineAndLine, showAnswerForPointAndSimpleFigure
+    showAnswerForLineAndLine, showAnswerForPointAndSimpleFigure, createCordsInput
 } from './function.js';
 
 
@@ -34,9 +34,22 @@ pages.addEventListener('click', (event) => {
     createCoordsSystemOnCanvas(canvas, ctx);
     // место для ответа
     answerPlace = currentWin.querySelector('.answer');
-
     inputs = currentWin.querySelector('form').querySelectorAll('input[type=number]');
 
+    // создание полей ввода для добавления точек
+    if (currentWin.classList.contains('dynamic')) {
+        const simpleFigure = currentWin.querySelector('.simpleFigure');
+        const btnAddPoint = currentWin.querySelector('.addPoint');
+
+        btnAddPoint.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const dynamicCoordsInput = createCordsInput();
+            simpleFigure.appendChild(dynamicCoordsInput);
+            inputs = currentWin.querySelector('form').querySelectorAll('input[type=number]');
+        });
+    }
 
     const btnSubmit = currentWin.querySelector('.btn');
     btnSubmit.addEventListener('click', (event) => {
@@ -61,7 +74,7 @@ pages.addEventListener('click', (event) => {
             showAnswerForLineAndLine(points, answerPlace, canvas, ctx);
         }
         if (btnSubmit.classList.contains('pointAndSimpleFigure')) {
-            showAnswerForPointAndSimpleFigure(points, answerPlace, canvas, ctx);
+            showAnswerForPointAndSimpleFigure(points, answerPlace, canvas, ctx, X_MIN);
         }
     });
 });

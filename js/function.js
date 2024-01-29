@@ -92,11 +92,20 @@ function createCoordsSystemOnCanvas(canvas, ctx) {
     ctx.stroke();
 }
 
+function createCordsInput() {
+    const dynamicCoordsInput = document.createElement('div');
+    dynamicCoordsInput.classList.add('dynamicCoordsInput');
+    dynamicCoordsInput.innerHTML =
+        ' <label>x: <input type="number" name="secondLineStartX" value=""></label>\n' +
+        '<label>y: <input type="number" name="secondLineStartY" value=""></label>' + '<span>;</span>';
+    return dynamicCoordsInput;
+}
+
 function showPoint(canvas, ctx, point, name) {
     let [pointX, pointY] = [...point];
     ctx.beginPath();
-    ctx.moveTo(pointX * 10 + 21, canvas.clientHeight - 21 - pointY * 10);
-    ctx.arc(pointX * 10 + 21, canvas.clientHeight - 21 - pointY * 10, 2, 0, Math.PI * 2);
+    ctx.moveTo(pointX * 10 + 20, canvas.clientHeight - 23 - pointY * 10);
+    ctx.arc(pointX * 10 + 20, canvas.clientHeight - 23 - pointY * 10, 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillText(name, pointX * 10 + 15, canvas.clientHeight - 30 - pointY * 10);
 
@@ -107,8 +116,8 @@ function showLine(canvas, ctx, line) {
     let [lineEndX, lineEndY] = [...line[1]];
 
     ctx.beginPath();
-    ctx.moveTo(lineStartX * 10 + 21, canvas.clientHeight - 21 - lineStartY * 10);
-    ctx.lineTo(lineEndX * 10 + 21, canvas.clientHeight - 21 - lineEndY * 10);
+    ctx.moveTo(lineStartX * 10 + 20, canvas.clientHeight - 23 - lineStartY * 10);
+    ctx.lineTo(lineEndX * 10 + 20, canvas.clientHeight - 23 - lineEndY * 10);
     ctx.stroke();
 }
 
@@ -125,15 +134,54 @@ function getYfromEquationOfLine(line, x) {
     return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
 }
 
-function checkArrayIsZero(arrs) {
-    return arrs.every(arr => arr.every(el => el === 0));
+function checkArrayIsZero(array) {
+
+    return array.flat().every(el => el === 0);
+}
+
+function isIntersectLines (array){
+    return (array[0] * array[1] <= 0) && (array[2] * array[3] <= 0)
+}
+function getVector(pointStart, pointEnd) {
+    return [pointEnd[0] - pointStart[0],
+        pointEnd[1] - pointStart[1]];
+
+}
+
+function getVectorNormal(pointStart, pointEnd) {
+    return [pointStart[1] - pointEnd[1],
+        pointEnd[0] - pointStart[0]];
+}
+
+function getScalarProductVectors(pointStart, pointEnd) {
+    return (pointStart[0] * pointEnd[0]) + (pointStart[1] * pointEnd[1]);
+}
+
+function getVectorProductVectors(vectorFirst, vectorSecond) {
+    return (vectorFirst[0] * vectorSecond[1]) - (vectorFirst[1] * vectorSecond[0]);
+}
+
+function isConvexFigure(productVectors) {
+    return productVectors.every(el => el > 0) || productVectors.every(el => el < 0);
+}
+
+function getAllVectorProductVectors(edgesVectors) {
+    const allVectorProductVectors = [];
+    edgesVectors.forEach((vector, index, vectors) => {
+        if (index === vectors.length - 1) {
+            allVectorProductVectors.push(getVectorProductVectors(vector, vectors[0]));
+        } else {
+            allVectorProductVectors.push(getVectorProductVectors(vector, vectors[index + 1]));
+        }
+    });
+    return allVectorProductVectors;
 }
 
 function showAnswerForPointAndLine(points, answerPlace, canvas, ctx, xMin, xMax) {
     const [point, line] = [points[0], [points[1], points[2]]];
     const answerText = document.createElement('p');
 
-    // проверка введенных данных (массив одноуровневых массивов)
+    // проверка введенных данных (массив одно уровневых массивов)
     if (!!checkArrayIsZero([point, ...line])) {
         answerText.innerText = `Введите данные`;
     } else {
@@ -154,22 +202,6 @@ function showAnswerForPointAndLine(points, answerPlace, canvas, ctx, xMin, xMax)
     answerPlace.appendChild(answerText);
 }
 
-function getVector(pointStart, pointEnd) {
-    let vector = [pointEnd[0] - pointStart[0],
-        pointEnd[1] - pointStart[1]];
-    return vector;
-}
-
-function getVectorNormal(pointStart, pointEnd) {
-    let vector = [pointStart[1] - pointEnd[1],
-        pointEnd[0] - pointStart[0]];
-    return vector;
-}
-
-function getScalarProductVectors(pointStart, pointEnd) {
-    return (pointStart[0] * pointEnd[0]) + (pointStart[1] * pointEnd[1]);
-}
-
 function showAnswerForLineAndLine(points, answerPlace, canvas, ctx, xMin, xMax) {
 
     const [firstLine, secondLine] = [[points[0], points[1]],
@@ -179,7 +211,7 @@ function showAnswerForLineAndLine(points, answerPlace, canvas, ctx, xMin, xMax) 
     if (!!checkArrayIsZero([...firstLine, ...secondLine])) {
         answerText.innerText = `Введите данные`;
     } else {
-        const [det1, det2, det3, det4] = [
+        const determinants = [
             // начало первой прямой сравнивается со второй прямой
             determinant([...firstLine[0],
                 ...secondLine[0],
@@ -194,7 +226,7 @@ function showAnswerForLineAndLine(points, answerPlace, canvas, ctx, xMin, xMax) 
             determinant([...secondLine[1], ...firstLine[0], ...firstLine[1]]),
         ];
 
-        if (det1 === 0 && det2 === 0 && det3 === 0 && det4 === 0) {
+        if (!!checkArrayIsZero(determinants)) {
             if ((((secondLine[0][0] <= firstLine[1][0]) && (secondLine[0][1] <= firstLine[1][1])) &&
                     ((secondLine[0][0] >= firstLine[0][0]) && (secondLine[0][1] >= firstLine[0][1]))) ||
                 (((secondLine[1][0] <= firstLine[1][0]) && (secondLine[1][1] <= firstLine[1][1])) &&
@@ -206,9 +238,8 @@ function showAnswerForLineAndLine(points, answerPlace, canvas, ctx, xMin, xMax) 
                 answerText.innerText = 'Отрезки лежат на одной прямой и не пересекаются';
             }
         } else {
-            if ((det1 * det2 <= 0) && (det3 * det4 <= 0)) {
+            if (!!isIntersectLines(determinants)) {
                 // получаем вектор прямой
-
                 const p3p4 = getVector(points[2], points[3]);
                 const p3p1 = getVector(points[2], points[0]);
                 // n - вектор нормали для первой прямой
@@ -235,23 +266,43 @@ function showAnswerForLineAndLine(points, answerPlace, canvas, ctx, xMin, xMax) 
     answerPlace.appendChild(answerText);
 }
 
-function showAnswerForPointAndSimpleFigure(points, answerPlace, canvas, ctx) {
+function showAnswerForPointAndSimpleFigure(points, answerPlace, canvas, ctx, xMin) {
+    // координаты точки
+    const p0 = points[0];
+    // точки для определения направления векторов граней против часовой стрелки
+    const pointsForEdges = [...points.slice(1), points[1]].reverse();
+    // получаем все грани по направлению против часовой стрелки
+    const edges = [];
+    pointsForEdges.forEach(
+        (point, index, points) => {
+            if (index !== points.length - 1)
+                edges.push([point, points[index + 1]]);
+        }
+    );
+    // получаем векторы граней
+    const edgesVectorsCounterClockWiseDirection = edges.map(line => getVector(...line));
+    // получаем векторные произведения всех пар граней
+    const allVectorProductVectors = getAllVectorProductVectors(edgesVectorsCounterClockWiseDirection);
+    // проверяем является ли фигура выпуклой (все векторные произведения должны быть одного знака),
+    // от этого зависит алгоритм проверки
+    const convexFigure = isConvexFigure(allVectorProductVectors);
+    // если фигура не выпуклая,
+    // определять положение точки будем при помощи лучевого теста
+    // если луч пересек грани четное количество раз, значит точка лежит за пределами фигуры
+    if (!convexFigure) {
+        // рисуем луч для определения положения точки
+        const tempRay = [[xMin, p0[1]], p0];
+        showLine(canvas, ctx, tempRay);
+
+    }
+
+    console.log(convexFigure);
     points.forEach((point, index) => {
         showPoint(canvas, ctx, point, `p${index}`);
     });
-    const lines = [];
-    points.forEach(
-        (point, index, points) => {
-            if (index === points.length - 1) {
-                lines.push([point, points[0]]);
-            } else {
-                lines.push([point, points[index + 1]]);
-            }
-        }
-    );
 
-    lines.forEach(line => {
-        showLine(canvas, ctx, line);
+    edges.forEach(edge => {
+        showLine(canvas, ctx, edge);
     });
 }
 
@@ -259,5 +310,6 @@ export {
     clearCanvas, clearAnswerPlace, openPage, closePage,
     createCoordsSystemOnCanvas, createContext, createCanvas,
     showAnswerForPointAndLine, showAnswerForLineAndLine, showAnswerForPointAndSimpleFigure,
+    createCordsInput
 };
 

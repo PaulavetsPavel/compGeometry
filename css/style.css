@@ -16,6 +16,7 @@ form input {
     height: 20px;
     margin-right: 20px;
 }
+
 .main {
     padding: 30px;
     background-image: url("../img/math.jpg");
@@ -121,12 +122,11 @@ form input {
     display: flex;
 }
 
-
-
-
 .form {
+    max-width: 40%;
     margin-right: 50px;
     min-height: 90vh;
+
 }
 .form h2{
     margin-bottom: 20px;
@@ -151,8 +151,20 @@ form input {
     color: darkred;
 }
 
-
-
+.addPoint {
+margin: 10px 0;
+}
+.simpleFigure{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.dynamicCoordsInput input{
+margin: 2px;
+}
+.dynamicCoordsInput{
+    margin: 10px;
+}
 
 
 
