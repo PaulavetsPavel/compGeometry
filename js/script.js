@@ -1,10 +1,13 @@
 import {
     clearCanvas, clearAnswerPlace,
     openPage, closePage, createCoordsSystemOnCanvas,
-    createCanvas, createContext, showAnswerForPointAndLine,
-    showAnswerForLineAndLine, showAnswerForPointAndSimpleFigure, createCordsInput
-} from './function.js';
-
+    createCanvas, createContext, createCordsInput
+} from './modules/_function.js';
+import {
+    showAnswerForPointAndLine,
+    showAnswerForLineAndLine,
+    showAnswerForPointAndSimpleFigure
+} from './modules/_functionForAnswer.js';
 
 const X_MIN = -2;
 const X_MAX = 50;
@@ -58,7 +61,7 @@ pages.addEventListener('click', (event) => {
         clearCanvas(canvas, ctx);
         clearAnswerPlace(answerPlace);
 
-        inputsValue = Array.from(inputs).map(input => input.value);
+        inputsValue = Array.from(inputs).map(input => +input.value);
 
         const points = [];
         inputsValue.forEach((value, index, array) => {
