@@ -11,6 +11,8 @@ import {
 	isConvexFigure,
 	getVectorProductVectors,
 	isPointInConvexPolygon,
+	clearCanvas,
+	createCoordsSystemOnCanvas,
 } from './_function.js';
 
 function showAnswerForPointAndLine(points, answerPlace, canvas, ctx, xMin, xMax) {
@@ -214,10 +216,96 @@ function showAnswerForPointAndConvexFigure(points, answerPlace, canvas, ctx) {
 		showLine(canvas, ctx, edge);
 	});
 }
+function grahamScanAnimated(points, canvas, ctx) {
+	function findLowestPoint(points) {
+		return points.reduce((lowest, point) => {
+			return point[1] < lowest[1] || (point[1] === lowest[1] && point[0] < lowest[0]) ? point : lowest;
+		}, points[0]);
+	}
+
+	function polarAngle(p0, p1) {
+		return Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
+	}
+
+	function distance(p0, p1) {
+		return Math.pow(p1[0] - p0[0], 2) + Math.pow(p1[1] - p0[1], 2);
+	}
+
+	function sortPointsByPolarAngle(points, lowest) {
+		points.sort((a, b) => {
+			let angleA = polarAngle(lowest, a),
+				angleB = polarAngle(lowest, b);
+
+			if (angleA === angleB) {
+				return distance(lowest, a) - distance(lowest, b);
+			}
+
+			return angleA - angleB;
+		});
+
+		return points;
+	}
+
+	function isCounterClockwise(p0, p1, p2) {
+		return (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0]) > 0;
+	}
+
+	function drawPoint(ctx, point, color = 'black') {
+		ctx.beginPath();
+		ctx.arc(point[0], point[1], 3, 0, 2 * Math.PI);
+		ctx.fillStyle = color;
+		ctx.fill();
+	}
+
+	function drawLine(ctx, p0, p1, color = 'red') {
+		ctx.beginPath();
+		ctx.moveTo(p0[0], p0[1]);
+		ctx.lineTo(p1[0], p1[1]);
+		ctx.strokeStyle = color;
+		ctx.stroke();
+	}
+
+	if (points.length < 3) return;
+
+	let lowest = findLowestPoint(points);
+	points = sortPointsByPolarAngle(points, lowest);
+	let stack = [lowest, points[1]];
+
+	// Рисуем все точки
+	points.forEach((point, index) => {
+		showPoint(canvas, ctx, point, `p${index}`);
+	});
+
+	function processPoint(i) {
+		if (i < points.length) {
+			while (stack.length > 1 && !isCounterClockwise(stack[stack.length - 2], stack[stack.length - 1], points[i])) {
+				stack.pop();
+				showLine(canvas, ctx, [...i, ...(i + 1)]);
+			}
+			stack.push(points[i]);
+
+			// Рисуем обновленную выпуклую оболочку
+			clearCanvas(canvas, ctx);
+			createCoordsSystemOnCanvas(canvas, ctx);
+			points.forEach((point, index) => showPoint(canvas, ctx, point, `p${index}`));
+			for (let j = 0; j < stack.length - 1; j++) {
+				showLine(canvas, ctx, ...stack[j], ...stack[j + 1]);
+			}
+
+			setTimeout(() => processPoint(i + 1), 1500); // задержка для анимации
+		} else {
+			// Замыкаем оболочку
+			showLine(canvas, ctx, ...stack[stack.length - 1], ...stack[0]);
+		}
+	}
+
+	processPoint(0);
+}
 
 export {
 	showAnswerForPointAndLine,
 	showAnswerForLineAndLine,
 	showAnswerForPointAndSimpleFigure,
 	showAnswerForPointAndConvexFigure,
+	grahamScanAnimated,
 };
